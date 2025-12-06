@@ -1,3 +1,4 @@
+
 import express from "express";
 import { Server } from "socket.io";
 import http from "http";
@@ -34,4 +35,4 @@ io.on("connection", (socket) => {
   })
 })
 
-export { app, server };
+
