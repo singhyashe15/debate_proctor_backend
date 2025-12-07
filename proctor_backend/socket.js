@@ -3,6 +3,7 @@ import express from "express";
 import { Server } from "socket.io";
 import http from "http";
 import dotenv from "dotenv";
+import pool from "./config/db.js";
 
 dotenv.config();
 
@@ -26,13 +27,42 @@ io.on("connection", (socket) => {
     socket.join(debateRoomId);
   })
 
-  socket.on('sendMsg', ({ debateId, message }) => {
-    console.log(message);
-    
-    socket.to(debateId).emit('real-time-sync-message', message);
+  socket.on('sendMsg', async ({ debateId, message }) => {
+    try {
+      const query = `
+      INSERT INTO messages 
+        (messageId, debaterId, debaterName, message, timestamp, factCheckStatus, round, debateId)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      RETURNING *;
+    `;
 
-    //testing phase
-  })
+      const values = [
+        message.messageId,
+        message.debaterId,
+        message.debaterName,
+        message.message,
+        message.timestamp,
+        message.factCheckStatus,
+        message.round,
+        debateId
+      ];
+
+      const result = await pool.query(query, values);
+      const savedMessage = result.rows[0];
+
+      console.log("Saved in DB:", savedMessage);
+
+      // Broadcast to room
+      socket.to(debateId).emit('real-time-sync-message', savedMessage);
+
+    } catch (error) {
+      console.error("DB Insert Error:", error.message);
+    }
+  });
+
+  socket.on("disconnect", () => {
+    console.log(`Socket ${socket.id} disconnected`);
+  });
 })
 
-
+export { app, server };
