@@ -18,7 +18,7 @@ const io = new Server(server, {
 });
 
 io.on("connection", (socket) => {
-  socket.on('debate-room', (debateRoomId) => {
+  socket.on('join-debate', (debateRoomId) => {
     console.log(debateRoomId)
     if (socket.rooms.has(debateRoomId)) {
       console.log(`Already in room: ${debateRoomId}`);

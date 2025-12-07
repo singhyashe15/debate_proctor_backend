@@ -73,6 +73,7 @@ app.post("/api/debates", async (req, res) => {
     ];
 
     const result = await pool.query(query, values);
+    console.log("Created Debate:", result.rows[0]);
     res.status(201).json(result.rows[0]);
   } catch (error) {
     console.error("Error creating debate:", error);
@@ -82,7 +83,9 @@ app.post("/api/debates", async (req, res) => {
 
 // 2. Get Debate by ID
 app.get("/api/debates/:id", async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.params
+  console.log("id" + id);
+  
   try {
     const result = await pool.query("SELECT * FROM debates WHERE id = $1", [id]);
     if (result.rows.length === 0) {
